@@ -1,0 +1,26 @@
+---
+
+- name: "{{ project_name }}"
+  hosts: dev
+  remote_user: vagrant
+
+  roles:
+    - role: gantsign.oh-my-zsh
+      users:
+        - username: "{{ username }}"
+    - mysql
+    - role: geerlingguy.nodejs
+      nodejs_version: "10.x"
+    - role: yarn
+    - role: php7_1
+      php_dev: yes
+    - role: apache2
+      become: yes
+      apache_vhosts:
+        # Additional optional properties: 'serveradmin, serveralias, extra_parameters'.
+        - servername: "{{ server_name }}"
+          documentroot: "{{ project_root }}"
+    - common
+    - role: symfony4
+
+...

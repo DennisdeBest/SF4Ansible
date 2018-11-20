@@ -1,0 +1,7 @@
+app_name: MyProjectName
+server_name: "{{ app_name }}.local"
+app_dir: "/var/www/{{ server_name }}"
+project_root: "/var/www/{{ server_name }}/public"
+username: vagrant
+home_dir: "/home/{{username}}"
+install_default_bundles: false

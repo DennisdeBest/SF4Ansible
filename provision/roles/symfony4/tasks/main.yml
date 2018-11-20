@@ -1,0 +1,86 @@
+---
+- name: check if /project contains composer.json
+  stat: path="{{ app_dir }}/composer.json"
+  register: project_files
+
+- name: Create symfony 4 starter app if /project is empty
+  shell: composer create-project symfony/skeleton "{{ app_dir }}"
+  when: project_files.stat.exists == False
+
+- name: allow symfony contrib recipes
+  shell: composer config extra.symfony.allow-contrib true
+  args:
+    chdir: "{{ app_dir }}"
+
+- name: add Vagrant user to www-data group
+  become: yes
+  user:
+    name: vagrant
+    group: www-data
+
+- name: add www-data user to vagrant group
+  become: yes
+  user:
+    name: www-data
+    group: vagrant
+
+- name: install default bundles
+  composer:
+    command: require
+    arguments: "{{item}}"
+    working_dir: "{{app_dir}}"
+  with_items: "{{components}}"
+  when: install_default_bundles
+
+- name: Install vendor bundles
+  shell: composer install
+  args:
+    chdir: "{{ app_dir }}"
+
+- name: Remove default user and password from .env
+  shell: sed '/DATABASE_URL/d' .env
+  args:
+    chdir: "{{ app_dir }}"
+  when: create_database
+
+- name: Set correct database user and password in .env
+  lineinfile: 
+    path: "{{app_dir}}/.env"
+    line: 'DATABASE_URL=mysql://exploit:exploit@127.0.0.1:3306/symfony'
+  when: create_database
+
+
+- name: Create database
+  shell: php bin/console doctrine:database:create --if-not-exists
+  args:
+    chdir: "{{ app_dir }}"
+  when: create_database
+
+- name: Update database schema
+  shell: php bin/console doctrine:schema:update --force
+  args:
+    chdir: "{{ app_dir }}"
+  when: create_database
+
+- name: Install assets
+  shell: php bin/console assets:install
+  args:
+    chdir: "{{ app_dir }}"
+
+- name: Clear cache
+  shell: php bin/console cache:clear
+  args:
+    chdir: "{{ app_dir }}"
+
+- name: Add aliases to zshrc
+  lineinfile:
+    path: "{{ home_dir }}/.zshrc"
+    line:  "alias {{ item }}"
+  loop: "{{ aliases }}"
+
+- name: CD to project dir on ssh
+  lineinfile:
+    path: "{{ home_dir }}/.zshrc"
+    line: "cd {{ app_dir }}"
+
+...

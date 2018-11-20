@@ -1,0 +1,18 @@
+---
+
+- name: Install common tools
+  apt: name="{{ item }}" state="latest" update_cache=yes
+  become: yes
+  with_items: "{{ packages }}"
+
+- name: Ensure group "exploit" exists
+  group:
+    name: exploit
+    state: present
+  become: yes
+
+- name: create exploit user if doesn't exist
+  action: user name=exploit group=exploit state=present
+  become: yes
+
+...

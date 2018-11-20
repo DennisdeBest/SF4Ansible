@@ -1,0 +1,24 @@
+app_dir: /var/www/symfony.local
+app_name: symfony
+create_database: true
+install_default_bundles: true
+components:
+  - doctrine/orm
+  - doctrine/doctrine-bundle
+  - twig
+  - annotations
+  - logger
+  - mailer
+  - sec-checker --dev
+  - symfony/apache-pack
+  - symfony/maker-bundle --dev
+  - symfony/form
+  - friendsofsymfony/jsrouting-bundle
+  - stof/doctrine-extensions-bundle
+  - migrations
+  - debug --dev
+  - asset
+  - encore
+
+aliases:
+  - .bc='./bin/console'
